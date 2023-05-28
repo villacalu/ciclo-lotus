@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+    database:
+        container_name: postgres
+        image: postgres
+        environment:
+            POSTGRES_USER: "user"
+            POSTGRES_PASSWORD: "password"
+            POSTGRES_DB: "mydb"
+        ports:
+            - "5433:5432"
+        restart: unless-stopped
+
+    frontend:
+        container_name: frontend
+        build: ./frontend
+        ports:
+            - "3000:3000"
+        restart: unless-stopped
+        volumes:
+            - ./frontend:/app
+        command: pnpm dev
+    
+    backend:
+        container_name: backend
+        build: ./backend
+        ports:
+            - "4000:4000"
+        env_file:
+            - ./backend/.env
+        volumes:
+            - ./backend:/app
+        depends_on:
+            - database
+        restart: unless-stopped
+        entrypoint: ["/bin/sh", "./entrypoint.sh"]
